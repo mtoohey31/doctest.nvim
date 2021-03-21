@@ -9,5 +9,5 @@ endif
 
 let g:loaded_doctest = 1
 
-autocmd BufEnter * call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))
-autocmd BufWritePost * call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))
+autocmd BufEnter * if &filetype == "python"|call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))|endif
+autocmd BufWritePost * if &filetype == "python"|call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))|endif

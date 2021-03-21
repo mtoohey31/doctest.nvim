@@ -1,9 +1,11 @@
 function! doctest#run_tests(folderpath, filename) abort
   let g:current_doctest_folder = a:folderpath
   let g:current_doctest_name = a:filename
+
   let ns_id = nvim_create_namespace("doctest")
   call nvim_buf_clear_namespace(0, ns_id, 0, -1)
   let g:current_doctest_ns_id = ns_id
+
   python3 << endpython
 import doctest
 import pynvim
@@ -59,15 +61,23 @@ class CustomRunner(doctest.DocTestRunner):
 with contextlib.redirect_stderr(open(os.devnull, 'w')):
     with contextlib.redirect_stdout(open(os.devnull, 'w')):
         sys.path.append(folder)
-        lib = importlib.import_module(name)
-        importlib.reload(lib)
+        imported = False
+        try:
+            lib = importlib.import_module(name)
+            importlib.reload(lib)
+            imported = True
 
-        finder = doctest.DocTestFinder()
+            finder = doctest.DocTestFinder()
 
-        tests_to_run = finder.find(lib)
+            tests_to_run = finder.find(lib)
 
-        for test in tests_to_run:
-            runner = CustomRunner()
-            runner.run(test)
+            for test in tests_to_run:
+                runner = CustomRunner()
+                runner.run(test)
+        except:
+            if not imported:
+                vim.api.command('echohl ErrorMsg|echo "doctest.nvim: import failed likely due to syntax error"|echohl None')
+            else:
+                vim.api.command('echohl ErrorMsg|echo "doctest.nvim: unexpected error"|echohl None')
 endpython
 endfunction
