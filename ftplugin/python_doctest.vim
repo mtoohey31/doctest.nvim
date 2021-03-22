@@ -1,13 +1,11 @@
 if exists('g:loaded_doctest') || &compatible
   finish
 elseif !has('python3')
-  echohl ErrorMsg
-  echo 'doctest.nvim: python3 required'
-  echohl None
+  echoerr 'doctest.nvim: python3 required, run :checkhealth provider'
   finish
 endif
 
 let g:loaded_doctest = 1
 
-autocmd BufEnter * if &filetype == "python"|call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))|endif
+autocmd BufEnter * if &filetype == "python" && filereadable(expand('%:p'))|call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))|endif
 autocmd BufWritePost * if &filetype == "python"|call doctest#run_tests(expand("<afile>:p:h"), expand("<afile>:t:r"))|endif

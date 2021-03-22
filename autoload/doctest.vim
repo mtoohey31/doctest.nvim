@@ -76,8 +76,8 @@ with contextlib.redirect_stderr(open(os.devnull, 'w')):
                 runner.run(test)
         except:
             if not imported:
-                vim.api.command('echohl ErrorMsg|echo "doctest.nvim: import failed likely due to syntax error"|echohl None')
+                vim.api.command('echoerr "doctest.nvim: import failed likely due to unwritten file or syntax error"')
             else:
-                vim.api.command('echohl ErrorMsg|echo "doctest.nvim: unexpected error"|echohl None')
+                vim.api.command('echoerr "doctest.nvim: unexpected error"')
 endpython
 endfunction
