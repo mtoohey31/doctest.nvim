@@ -4,7 +4,7 @@ A Neovim plugin for displaying doctest results when the buffer is entered and on
 
 ## Installation
 
-If you're using [vim-plug](https://github.com/junegunn/vim-plug):
+If you're using [vim-plug](https://github.com/junegunn/vim-plug), add the following to the vim-plug section of your `init.vim`:
 
 ```vim
 call plug#begin()
@@ -14,7 +14,14 @@ Plug 'mtoohey31/doctest.nvim'
 call plug#end()
 ```
 
-If you're using a different plugin manager, refer to that its documentation for the correct syntax.
+If you're using a different plugin manager, refer to its documentation for the correct syntax. Also, if you don't have them in your `init.vim` already, add:
+
+```vim
+filetype plugin on
+set nocompatible
+```
+
+Finally, ensure that you have the `python3` provider set up by running `:checkhealth provider`.
 
 ## Configuration
 
