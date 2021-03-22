@@ -2,6 +2,8 @@
 
 A Neovim plugin for displaying doctest results when the buffer is entered and on write, using the Neovim virtual text feature. Note that by default, no output is displayed for doctests that succeed. See [Configuration](#Configuration) for information on how to change this behaviour if you prefer more verbose output.
 
+[![demo](https://asciinema.org/a/6dApDMXFD1oAz9cM1UO5wkctm.svg)](https://asciinema.org/a/6dApDMXFD1oAz9cM1UO5wkctm)
+
 ## Installation
 
 If you're using [vim-plug](https://github.com/junegunn/vim-plug), add the following to the vim-plug section of your `init.vim`:
