@@ -6,6 +6,9 @@ function! doctest#run_tests(folderpath, filename) abort
   call nvim_buf_clear_namespace(0, ns_id, 0, -1)
   let g:current_doctest_ns_id = ns_id
 
+  let g:pycache_path = a:folderpath . "/__pycache__/"
+  let g:pycache_existed = isdirectory(g:pycache_path)
+
   python3 << endpython
 import doctest
 import pynvim
@@ -58,26 +61,29 @@ class CustomRunner(doctest.DocTestRunner):
                                      ["# " + traceback.split('\n')[-2].strip(), "Error"]], {})
 
 
-with contextlib.redirect_stderr(open(os.devnull, 'w')):
-    with contextlib.redirect_stdout(open(os.devnull, 'w')):
-        sys.path.append(folder)
-        imported = False
-        try:
-            lib = importlib.import_module(name)
-            importlib.reload(lib)
-            imported = True
+if '.' not in name:
+    with contextlib.redirect_stderr(open(os.devnull, 'w')):
+        with contextlib.redirect_stdout(open(os.devnull, 'w')):
+            sys.path.append(folder)
+            imported = False
+            try:
+                lib = importlib.import_module(name)
+                importlib.reload(lib)
+                imported = True
 
-            finder = doctest.DocTestFinder()
+                finder = doctest.DocTestFinder()
 
-            tests_to_run = finder.find(lib)
+                tests_to_run = finder.find(lib)
 
-            for test in tests_to_run:
-                runner = CustomRunner()
-                runner.run(test)
-        except:
-            if not imported:
-                vim.api.command('echoerr "doctest.nvim: import failed likely due to unwritten file or syntax error"')
-            else:
-                vim.api.command('echoerr "doctest.nvim: unexpected error"')
+                for test in tests_to_run:
+                    runner = CustomRunner()
+                    runner.run(test)
+            except:
+                if not imported:
+                    vim.api.command('echoerr "doctest.nvim: import failed likely due to unwritten file or syntax error"')
+                else:
+                    vim.api.command('echoerr "doctest.nvim: unexpected error"')
+else:
+    vim.api.command('echoerr "doctest.nvim: filename contains period"')
 endpython
 endfunction
