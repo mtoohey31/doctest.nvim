@@ -78,9 +78,16 @@ if '.' not in name:
                 for test in tests_to_run:
                     runner = CustomRunner()
                     runner.run(test)
+
+                vim.api.set_var('doctest_succeeded', 1)
             except:
                 if not imported:
-                    vim.api.command('echoerr "doctest.nvim: import failed likely due to unwritten file or syntax error"')
+                    try:
+                        succeeded = vim.api.get_var('doctest_succeeded')
+                    except:
+                        pass
+                    if 'succeeded' in vars():
+                        vim.api.command('echoerr "doctest.nvim: import failed likely due to unwritten file or syntax error"')
                 else:
                     vim.api.command('echoerr "doctest.nvim: unexpected error"')
 else:
