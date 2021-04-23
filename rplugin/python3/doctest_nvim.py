@@ -102,10 +102,20 @@ class DoctestPlugin:
             else:
                 namespace_id = self.nvim.api.create_namespace('doctest')
 
+            # Attempt to fetch the verbose string variable, leave it blank
+            # otherwise
+            verbose_string = None
+            try:
+                verbose_string = self.nvim.api.get_var(
+                    'doctest_verbose_string')
+            except:
+                pass
+
             # Run each test
             for test in tests_to_run:
-                runner = self.runner(self.nvim, namespace_id)
+                runner = self.runner(self.nvim, namespace_id, verbose_string)
                 runner.run(test)
+
         # Except syntax errors (which would originate from the imported file)
         # and inform the user of the error
         except SyntaxError:
