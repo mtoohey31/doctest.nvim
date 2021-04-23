@@ -6,13 +6,11 @@ A Neovim plugin for displaying doctest results when the buffer is entered and on
 
 ## Installation
 
-If you're using [vim-plug](https://github.com/junegunn/vim-plug), add the following to the vim-plug section of your `init.vim`:
+First, ensure that you have the `python3` provider set up by running `:checkhealth provider` and following the instructions there if things aren't set up. Then, if you're using [vim-plug](https://github.com/junegunn/vim-plug), add the following to the vim-plug section of your `init.vim`:
 
 ```vim
 call plug#begin()
-
-Plug 'mtoohey31/doctest.nvim'
-
+Plug 'mtoohey31/doctest.nvim', { 'do': ':UpdateRemotePlugins' }
 call plug#end()
 ```
 
@@ -23,12 +21,16 @@ filetype plugin on
 set nocompatible
 ```
 
-Finally, ensure that you have the `python3` provider set up by running `:checkhealth provider`.
-
 ## Configuration
 
-As of now, the only configuration variable is `g:doctest_verbose_string`. When this variable is unset, no output will be displayed for doctests that succeed. When it is set, the output next to the succeeding doctest will be the string representation of whatever the variable is set to. To set it, use the following syntax:
+The first configuration variable is `g:doctest_verbose_string`. When set, tests that succeed will have this string displayed next to them. By default, nothing is displayed if the variable is unset. As an example, if you add the following to your `init.vim`, `# Succeeded` will be displayed next to every successful test.
 
 ```vim
 let g:doctest_verbose_string = "Succeeded"
+```
+
+The second configuration variable is `g:doctest_remove_pycache`. By default, the `__pycache__` directory at the current location is removed when Neovim exits, if you want to disable this behaviour, set the following:
+
+```vim
+let g:doctest_remove_pycache = 0
 ```
