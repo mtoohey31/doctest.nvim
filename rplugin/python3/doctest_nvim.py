@@ -106,11 +106,18 @@ class DoctestPlugin:
             for test in tests_to_run:
                 runner = self.runner(self.nvim, namespace_id)
                 runner.run(test)
-        # Except syntax errors (which would originate from the imported file) 
+        # Except syntax errors (which would originate from the imported file)
         # and inform the user of the error
         except SyntaxError:
             self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
                                   'SyntaxError in file" | echohl None')
+        # Except errors finding the module (which would occur when the file has
+        # not yet been written, or when the file contains unsupported
+        # characters) and inform the user only if the file already exits
+        except ModuleNotFoundError:
+            if os.path.isfile(filepath):
+                self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
+                                      'Error importing file" | echohl None')
 
     @pynvim.autocmd('QuitPre', sync=True)
     def disable(self) -> None:
