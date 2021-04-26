@@ -125,6 +125,11 @@ class DoctestPlugin:
                 self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
                                       'Error importing file, path may contain '
                                       ' unsupported characters" | echohl None')
+        # Except syntax errors (which would originate from the imported file)
+        # and inform the user of the error
+        except SyntaxError:
+            self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
+                                  'SyntaxError in file" | echohl None')
         # Except all other errors and inform the user of the kind of error that
         # occurred
         except Exception as e:
