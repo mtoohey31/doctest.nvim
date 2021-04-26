@@ -61,7 +61,8 @@ class DoctestPlugin:
                     elif line == 'Got:':
                         got_found = True
 
-            def report_unexpected_exception(self, out, test, example, exc_info) -> None:
+            def report_unexpected_exception(self, out, test, example,
+                                            exc_info) -> None:
                 """Report that the given example raised an unexpected exception
                 by displaying the exception as virtualtext."""
                 # Get the exception traceback
@@ -116,18 +117,20 @@ class DoctestPlugin:
                 runner = self.runner(self.nvim, namespace_id, verbose_string)
                 runner.run(test)
 
-        # Except syntax errors (which would originate from the imported file)
-        # and inform the user of the error
-        except SyntaxError:
-            self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
-                                  'SyntaxError in file" | echohl None')
         # Except errors finding the module (which would occur when the file has
         # not yet been written, or when the file contains unsupported
         # characters) and inform the user only if the file already exits
         except ModuleNotFoundError:
             if os.path.isfile(filepath):
                 self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
-                                      'Error importing file" | echohl None')
+                                      'Error importing file, path may contain '
+                                      ' unsupported characters" | echohl None')
+        # Except all other errors and inform the user of the kind of error that
+        # occurred
+        except Exception as e:
+            self.nvim.api.command('echohl ErrorMsg | echo "doctest.nvim: '
+                                  f'Encountered {type(e).__name__} while '
+                                  'attempting to run tests" | echohl None')
 
     @pynvim.autocmd('QuitPre', sync=True)
     def disable(self) -> None:
