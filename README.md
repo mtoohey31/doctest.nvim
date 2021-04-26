@@ -34,3 +34,9 @@ The second configuration variable is `g:doctest_remove_pycache`. By default, the
 ```vim
 let g:doctest_remove_pycache = 0
 ```
+
+The third configuration variable is `g:doctest_traceback_info`. By default, tests that produce errors will display long traceback messages indicating the origin of the error. If you want to disable this behaviour, set the following:
+
+```vim
+let g:doctest_traceback_info = 0
+```

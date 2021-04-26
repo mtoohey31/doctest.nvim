@@ -21,14 +21,19 @@ class DoctestPlugin:
         class VirtualTextRunner(doctest.DocTestRunner):
             nvim: pynvim.Nvim
             namespace_id: int
+            filepath: str
+            traceback_info: bool
             verbose_string: Optional[str] = None
 
             def __init__(self, nvim: pynvim.Nvim, namespace_id: int,
+                         filepath: str, traceback_info: bool,
                          verbose_string: str = None) -> None:
                 # Call the DocTestRunner init method
                 super().__init__()
                 self.nvim = nvim
                 self.namespace_id = namespace_id
+                self.filepath = filepath
+                self.traceback_info = traceback_info
                 self.verbose_string = verbose_string
 
             def report_success(self, out, test, example, got) -> None:
@@ -67,7 +72,32 @@ class DoctestPlugin:
                 by displaying the exception as virtualtext."""
                 # Get the exception traceback
                 traceback = doctest._exception_traceback(exc_info)
-                traceback_string = "# " + traceback.split('\n')[-2].strip()
+                traceback_string = '# ' + traceback.split('\n')[-2].strip()
+                # Check whether detailed traceback info is enabled
+                if self.traceback_info:
+                    for line in [line.strip() for line
+                                 in reversed(traceback.split('\n')[:-2])]:
+                        # Handle lines differently based on whether they're
+                        # showing the code that created the error, or the
+                        # place where that code was found
+                        if line[0:4] == 'File':
+                            path = re.sub(r'(^[^"]*")|("[^"]*$)', '', line)
+                            # Depending on whether the error was a result off
+                            # code in the current file or another, display the
+                            # file path or the line number
+                            if path == self.filepath:
+                                lineno = re.sub(
+                                    r'(^.*line (?=\d))|((?<=\d), in .*$)', '',
+                                    line)
+                                traceback_string += f' on line {lineno}'
+                                pass
+                            else:
+                                # Show the relative path to the file instead of
+                                # the absolute path to save space
+                                relpath = os.path.relpath(path)
+                                traceback_string += f' in {relpath}'
+                        else:
+                            traceback_string += f'; by `{line}`'
                 # Display the virtualtext
                 self.nvim.api.buf_set_virtual_text(0, self.namespace_id,
                                                    example.lineno + test.lineno
@@ -103,6 +133,15 @@ class DoctestPlugin:
             else:
                 namespace_id = self.nvim.api.create_namespace('doctest')
 
+            # Attempt to fetch the verbose string variable, set it to True
+            # otherwise
+            traceback_info = True
+            try:
+                traceback_info = bool(self.nvim.api.get_var(
+                    'doctest_traceback_info'))
+            except:
+                pass
+
             # Attempt to fetch the verbose string variable, leave it blank
             # otherwise
             verbose_string = None
@@ -114,7 +153,8 @@ class DoctestPlugin:
 
             # Run each test
             for test in tests_to_run:
-                runner = self.runner(self.nvim, namespace_id, verbose_string)
+                runner = self.runner(self.nvim, namespace_id, filepath,
+                                     traceback_info, verbose_string)
                 runner.run(test)
 
         # Except errors finding the module (which would occur when the file has
